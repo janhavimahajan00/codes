@@ -1,0 +1,348 @@
+Gradient descent:
+current_x = 2
+rate = 0.01
+precision = 0.000001
+delta_x = 1
+max_iterations = 10000
+iteration_counter = 0
+def slope(x):
+ return 2*(x+3)
+def value_y(x):
+ return (x+3)**2
+y = []
+x = []
+y.append(value_y(current_x))
+x.append(current_x)
+while delta_x > precision and iteration_counter < max_iterations:
+ previous_x = current_x
+ current_x = previous_x - rate * slope(previous_x)
+ y.append(value_y(current_x))
+ x.append(current_x)
+ delta_x = abs(previous_x - current_x)
+ print(f"Iteration {iteration_counter+1}")
+ iteration_counter += 1
+ print(f"X = {current_x}")
+print(f"Local Minima occurs at: {current_x}")
+import matplotlib.pyplot as plt
+plt.scatter(x,y)
+plt.xlabel('x-values')
+plt.ylabel('y-values')
+plt.title('y=(x+3)^2')
+plt.show()
+
+
+
+
+
+
+
+Bank-customer:
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+import tensorflow as tf
+df = pd.read_csv('Churn_Modelling.csv')
+df.head()
+df.info()
+plt.xlabel('Exited')
+plt.ylabel('Count')
+df['Exited'].value_counts().plot.bar()
+plt.show()
+df['Geography'].value_counts()
+df = pd.concat([df,pd.get_dummies(df['Geography'],prefix='Geo')],axis=1)
+df = pd.concat([df,pd.get_dummies(df['Gender'])],axis=1)
+df.info()
+df.drop(columns=['RowNumber','CustomerId','Surname','Geography','Gender'],inplace=True)
+df.head()
+y = df['Exited'].values
+x = df.loc[:,df.columns != 'Exited'].values
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test = train_test_split(x,y,random_state=20,test_size=0.25)
+from sklearn.preprocessing import StandardScaler
+std_x = StandardScaler()
+x_train = std_x.fit_transform(x_train)
+x_test = std_x.transform(x_test)
+x_train.shape
+import tensorflow as tf
+from tensorflow.keras.layers import Dense,Conv1D,Flatten
+from tensorflow.keras.models import Sequential, Model
+model=Sequential()
+model.add(Flatten(input_shape=(13,)))
+model.add(Dense(100,activation='relu'))
+model.add(Dense(1,activation='sigmoid'))
+model.compile(optimizer='adam',metrics=['accuracy'],loss='BinaryCrossentropy')
+model.fit(x_train,y_train,batch_size=64,validation_split=0.1,epochs=100)
+pred = model.predict(x_test)
+y_pred = []
+for val in pred:
+ if val > 0.5:
+ y_pred.append(1)
+ else:
+ y_pred.append(0)
+from sklearn.metrics import accuracy_score,confusion_matrix,ConfusionMatrixDisplay
+accuracy_score(y_test,y_pred)
+cm = confusion_matrix(y_test,y_pred)
+display = ConfusionMatrixDisplay(cm)
+display.plot()
+
+
+
+
+
+
+
+
+
+
+KNN:
+import numpy as np
+import pandas as pd
+from sklearn.neighbors import KNeighborsClassifier
+import matplotlib.pylab as plt
+dataset=pd.read_csv('knn.csv')
+dataset.head
+x=dataset.iloc[:,:-1].values
+x
+y=dataset.iloc[:,2].values
+y
+classifier=KNeighborsClassifier(n_neighbors=3)
+classifier.fit(x,y)
+x_test=np.array([6,6])
+y_pred=classifier.predict([x_test])
+print("General KNN-GIVEN POINT IS FROM",y_pred,"class")
+classifer1 = KNeighborsClassifier(n_neighbors=3, weights="distance")
+classifer1.fit(x,y)
+X_test1 = np.array([6,6])
+y_pred1 = classifer1.predict([X_test1])
+print("Distance Weighted KNN:: ",y_pred1)
+print("General KNN:: ",y_pred)
+print("Distance Weighted KNN:: ",y_pred1)
+x = [2,4,4,4,6,6]
+y = [4,2,4,6,2,4]
+plt.scatter(x,y,color="black")
+
+
+
+
+
+
+
+
+E-mail:
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+df = pd.read_csv('emails.csv')
+df.head()
+df.isnull().sum()
+df.dropna(how='any',inplace=True)
+x = df.iloc[:,1:-1].values
+y = df.iloc[:,-1].values
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.25,random_state=10)
+from sklearn.metrics import
+ConfusionMatrixDisplay,confusion_matrix,accuracy_score,precision_score,recall_score,plot_precision_recall_curve,plot_roc_curve
+def report(classifier):
+ y_pred = classifier.predict(x_test)
+ cm = confusion_matrix(y_test,y_pred)
+ display = ConfusionMatrixDisplay(cm,display_labels=classifier.classes_)
+ display.plot()
+ print(f"Accuracy: {accuracy_score(y_test,y_pred)}")
+ print(f"Precision Score: {precision_score(y_test,y_pred)}")
+ print(f"Recall Score: {recall_score(y_test,y_pred)}")
+ plot_precision_recall_curve(classifier,x_test,y_test)
+ plot_roc_curve(classifier,x_test,y_test)
+E-mail(knn)
+from sklearn.neighbors import KNeighborsClassifier
+kNN = KNeighborsClassifier(n_neighbors=10)
+kNN.fit(x_train,y_train)
+report(kNN)
+
+
+
+
+
+
+
+
+K-Means:
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+df = pd.read_csv('sales_data_sample.csv',encoding='unicode_escape')
+df.head()
+df.info()
+df_drop=['ADDRESSLINE1','ADDRESSLINE2','POSTALCODE','CITY','TERRITORY','PHONE','STATE','CONTACTFIRSTNAME','CONTACTLASTNAME','C
+USTOMERNAME','ORDERNUMBER']
+df = df.drop(df_drop, axis=1)
+df.info()
+for col in df.columns.values:
+ print(df[col].value_counts())
+df.drop(columns=['ORDERDATE','STATUS','MONTH_ID','QTR_ID','YEAR_ID'],inplace=True)
+df.head()
+from sklearn.preprocessing import LabelEncoder
+def convert_categories(col):
+ le = LabelEncoder()
+ df[col] = le.fit_transform(df[col].values)
+categories = ['PRODUCTLINE','PRODUCTCODE','COUNTRY','DEALSIZE']
+for col in categories:
+ convert_categories(col)
+df.head()
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+data = sc.fit_transform(df)
+from sklearn.cluster import KMeans
+wcss = []
+for k in range(1,15):
+ kmeans = KMeans(n_clusters=k,init='k-means++',random_state=15)
+ kmeans.fit(data)
+ wcss.append(kmeans.inertia_)
+k = list(range(1,15))
+plt.plot(k,wcss)
+plt.xlabel('Clusters')
+plt.ylabel('scores')
+plt.title('Finding right number of clusters')
+plt.grid()
+plt.show()
+
+
+
+
+
+
+
+
+Uber:
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import datetime as dt
+df = pd.read_csv("uber.csv")
+df.head()
+df.drop(columns=['Unnamed: 0','key'],inplace=True)
+df.info()
+df.dropna(how='any',inplace=True)
+df.isnull().sum()
+for col in df.select_dtypes(exclude=['object']):
+ plt.figure()
+ sns.boxplot(data=df,x=col)
+df = df[
+ (df.pickup_latitude > -90) & (df.pickup_latitude < 90) &
+ (df.dropoff_latitude > -90) & (df.dropoff_latitude < 90) &
+ (df.pickup_longitude > -180) & (df.pickup_longitude < 180) &
+ (df.dropoff_longitude > -180) & (df.dropoff_longitude < 180) &
+ (df.fare_amount > 0) & (df.passenger_count > 0) & (df.passenger_count < 50)
+]
+from math import cos, asin, sqrt, pi
+import numpy as np
+def distance(lat_1,lon_1,lat_2,lon_2):
+ lon_1, lon_2, lat_1, lat_2 = map(np.radians, [lon_1, lon_2, lat_1, lat_2])
+ diff_lon = lon_2 - lon_1
+ diff_lat = lat_2 - lat_1
+ km = 2 * 6371 * np.arcsin(np.sqrt(np.sin(diff_lat/2.0)**2 + np.cos(lat_1) * np.cos(lat_2) * np.sin(diff_lon/2.0)**2))
+ return km
+temp = distance(df['pickup_latitude'],df['pickup_longitude'],df['dropoff_latitude'], df['dropoff_longitude'])
+temp.head()
+df_new = df.copy()
+df_new['Distance'] = temp
+df = df_new
+df.head()
+sns.boxplot(data=df,x='Distance')
+df = df[(df['Distance'] < 200) & (df['Distance'] > 0)]
+df['pickup_datetime'] = pd.to_datetime(df['pickup_datetime'])
+df['week_day'] = df['pickup_datetime'].dt.day_name()
+df['Year'] = df['pickup_datetime'].dt.year
+df['Month'] = df['pickup_datetime'].dt.month
+df['Hour'] = df['pickup_datetime'].dt.hour
+df.drop(columns=['pickup_datetime','pickup_latitude','pickup_longitude','dropoff_latitude','dropoff_longitude'],inplace=True)
+df.head()
+temp = df.copy()
+def convert_week_day(day):
+ if day in ['Monday','Tuesday','Wednesday','Thursday']:
+ return 0 # Weekday
+ return 1 # Weekend
+def convert_hour(hour):
+ if 5 <= hour <= 12:
+ return 1
+ elif 12 < hour <= 17:
+ return 2
+ elif 17 < hour < 24:
+ return 3
+ return 0
+df['week_day'] = temp['week_day'].apply(convert_week_day)
+df['Hour'] = temp['Hour'].apply(convert_hour)
+df.head()
+df.corr()
+sns.scatterplot(y=df['fare_amount'],x=df['Distance'])
+from sklearn.preprocessing import StandardScaler
+x = df[['Distance']].values
+y = df['fare_amount'].values.reshape(-1,1)
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train,y_test = train_test_split(x,y,random_state=10)
+std_x = StandardScaler()
+x_train = std_x.fit_transform(x_train)
+x_test = std_x.transform(x_test)
+std_y = StandardScaler()
+y_train = std_y.fit_transform(y_train)
+y_test = std_y.transform(y_test)
+from sklearn.metrics import mean_squared_error,r2_score, mean_absolute_error
+def fit_predict(model):
+ model.fit(x_train,y_train.ravel())
+ y_pred = model.predict(x_test)
+ r_squared = r2_score(y_test,y_pred)
+ RMSE = mean_squared_error(y_test, y_pred,squared=False)
+ MAE = mean_absolute_error(y_test,y_pred)
+ print('R-squared: ', r_squared)
+ print('RMSE: ', RMSE)
+ print("MAE: ",MAE)
+from sklearn.linear_model import LinearRegression
+fit_predict(LinearRegression())
+from sklearn.ensemble import RandomForestRegressor
+fit_predict(RandomForestRegressor())
+
+
+
+
+
+
+General:
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error,r2_score, mean_absolute_error
+df = pd.read_csv('')
+df.head()
+df.taill()
+df.info()
+df.shape
+df.max()
+df.min()
+df.d_types
+df.describe(
+df.dropna(inplace=True)
+df.isnull().sum()
+df.dropna(how='any',inplace=True)
+plt.hist(pushpa['SepalLengthCm'])
+plt.title('frequency of height of SepalLength')
+plt.xlabel('Height')
+plt.ylabel('Frequency')
+sns.scatterplot(x='SepalLengthCm',y='SepalWidthCm',data=pushpa,hue='Species')
+plt.show()
+plt.pie(list(ipl.winner.value_counts()),labels=list(ipl.winner.value_counts().keys()),autopct='%0.1f%%',radius=5)
+plt.show()
+plt.plot(xpoints, ypoints)
+plt.show()
+x=pushpa[['column_name']]
+y=pushpa[['target_column_name']]
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.3)
+lr=LinearRegression()
+lr.fit(x_train,y_train)
+y_pred=lr.predict(x_test)
+mean_squared_error(x_test,y_pred)
